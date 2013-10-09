@@ -1,0 +1,59 @@
+{
+  "builders": [
+    {
+      "type": "vmware",
+      "iso_url": "http://pkg.geoffgarside.co.uk/FreeBSD-9.2-RELEASE-amd64-dvd1.iso",
+      "iso_checksum": "21448c2688ba938b42c1727449d69750",
+      "iso_checksum_type": "md5",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_wait_timeout": "10000s",
+      "guest_os_type": "freebsd-64",
+      "shutdown_command": "sudo shutdown -p now",
+      "boot_wait": "35s",
+      "boot_command": [
+        "l<wait>",
+        "root<enter><wait>",
+        "mkdir -p /tmp/bsdinstall_etc<enter>",
+        "touch /tmp/bsdinstall_etc/resolv.conf<enter>",
+        "dhclient em0<enter><wait5>",
+        "fetch -o /tmp/setup.sh http://{{ .HTTPIP }}:{{ .HTTPPort }}/setup.sh<enter>",
+        "<wait5>",
+        "chmod +x /tmp/setup.sh<enter>",
+        "/tmp/setup.sh<enter>",
+        "da0<enter>",
+        "rpool<enter>",
+        "freebsd92.vagrantup.com<enter>",
+        "em0<enter>",
+        "DHCP<enter>",
+        "vagrant<enter>",
+        "vagrant<enter>"
+      ],
+      "http_directory": "http",
+      "disk_size": 20480,
+      "vmx_data": {
+        "cpuid.coresPerSocket": "1",
+        "memsize": "2048",
+        "numvcpus": "1",
+        "hpet0.present": "TRUE",
+        "ehci.present": "TRUE",
+        "usb.present": "TRUE"
+      }
+    }
+  ],
+  "post-processors": [
+    "vagrant"
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "chmod +x {{ .Path }}; sudo {{ .Vars }} {{ .Path }}",
+      "scripts": [
+        "scripts/vmware.sh",
+        "scripts/vagrant.sh",
+        "scripts/puppet.sh",
+        "scripts/chef-omnibus.sh"
+      ]
+    }
+  ]
+}
